@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>BlackJack Counter</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+</head>
+
+<body>
+    <main>
+        <h1>Welcome to Blackjack baby!</h1>
+    </main>
+
+    <button data-counter="2" id="2button">2</button>
+    <button data-counter="3" id="3button">3</button>
+    <button data-counter="4" id="4button">4</button>
+    <button data-counter="5" id="5button">5</button>
+    <button data-counter="6" id="6button">6</button>
+    <button data-counter="7" id="7button">7</button>
+    <button data-counter="8" id="8button">8</button>
+    <button data-counter="9" id="9button">9</button>
+    <button data-counter="T" id="Tbutton">T</button>
+    <button data-counter="A" id="Abutton">A</button>
+    <button data-counter="?" id="Abutton">?</button>
+
+    <pre id="output"></pre>
+
+    <label for="playerHand"> Your Hand: </label>
+    <input type="text" id="playerHand"/><br/>
+
+    <label for="dealerHand"> Dealer's Hand: </label>
+    <input type="text" id="dealerHand"/><br/>
+
+    
+    <button id="simulate"> Simulate </button> <br/>
+    <button id="next"> Next Hand </button> <br/>
+
+    <script src="scripts.js"></script>
+</body>
+
+</html>
