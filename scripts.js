@@ -35,15 +35,28 @@ function simulate(playerHand, dealerHand){
     let player_count = 0;
     let dealer_count = 0;
     for(const p of playerHand){
-        if (p === 'T'){
-            player_count+=10
+        shoe_copy[p]--;
+        if(p === 'T'){ player_count+=10; }
+        else if(p === 'A'){ player_count+=11; }
+        else{
+            player_count+=(p - '0');
         }
-        else if (char === 'A'){
-            simulate()
-            player_count+=10
-            
-        }
+        shoe_copy['cards_left']--;
     }
+    for(const d of dealerHand){
+        shoe_copy[d]--;
+        if(d === 'T'){ dealer_count+=10; }
+        else if(d === 'A'){ dealer_count+=11; }
+        else{
+            player_count+=(d - '0');
+        }
+        shoe_copy['cards_left']--;
+    }
+
+    console.log(shoe);
+    console.log(shoe_copy);
+    console.log(player_count);
+    console.log(dealer_count);
 
 //repeat ALOT
     //grab random queue of cards equal to 60
@@ -55,8 +68,15 @@ function simulate(playerHand, dealerHand){
 
 
 
+document.getElementById('simulate').addEventListener('click', () => {
+    const playerHand = document.getElementById('playerHand').value;
+    const dealerHand = document.getElementById('dealerHand').value;
 
 
+
+    simulate(playerHand.split(''),dealerHand.split(''));
+
+});
 
 
 
