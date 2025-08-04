@@ -1,6 +1,6 @@
 //BLACKJACK VALUES
 const shoe_decks = 3;
-const total_simulations = 10000000;
+const total_simulations = 10000;
 
 class Deck {
     wholeDecks
@@ -19,8 +19,8 @@ class Deck {
         11: 0,
     }
 
-    constructor(whoelDecks){
-        this.wholeDecks = whoelDecks;
+    constructor(wholeDecks){
+        this.wholeDecks = wholeDecks;
         this.resetDeck();
     }
 
@@ -111,9 +111,7 @@ function simulate(playerHand, dealerHand, simulations){
     for(let i=0; i < (simulations/2); i++){
         const simulation_deck = copied_deck.clone();
         let simu_player_count = player_count;
-        let simu_dealer_count = dealer_count;
         const simu_playerHand = structuredClone(playerHand);
-        const simu_dealerHand = structuredClone(dealerHand);
 
         let end_sim = false;
 
@@ -148,45 +146,10 @@ function simulate(playerHand, dealerHand, simulations){
             else { console.log("something went very wrong"); end_sim=true;}
         }
 
-        // //dealer
-        while(!end_sim){
-            simu_dealerHand[simu_dealerHand.length]=simulation_deck.removeRandomCard();
-            simu_dealer_count+=simu_dealerHand[simu_dealerHand.length-1];
+        //dealer
 
-            if(simu_dealer_count>21){
-                if(simu_dealerHand.indexOf(11)!==-1){
-                    simu_dealerHand[simu_dealerHand.indexOf(11)]=1;
-                    simu_dealer_count-=10;
-                }
-                else {
-                    //console.log("Dealer busts");
-                    total_value_hit += 1;
-                    end_sim=true;
-                }
-            }
-            else if(simu_dealer_count === 21){
-                //console.log("Dealer Blackjack");
-                total_value_hit += -1;
-                end_sim=true;
-            }
-            else if(simu_dealer_count>=17){
-                if(simu_dealer_count===simu_player_count){
-                    //console.log("Push");
-                    total_value_hit += 0;
-                    end_sim=true;
-                }
-                else if(simu_dealer_count<simu_player_count){
-                    //console.log("Player beats Dealer");
-                    total_value_hit += 1;
-                    end_sim=true;
-                }
-                else if(simu_dealer_count>simu_player_count){
-                    //console.log("Dealer beats Player");
-                    total_value_hit += -1;
-                    end_sim=true;
-                }
-            }
-        }
+        total_value_hit += dealerSimulation( simu_player_count, structuredClone(dealerHand), dealer_count, simulation_deck);
+
     }
 
     const hit_ev = total_value_hit / (simulations/2);
@@ -195,52 +158,10 @@ function simulate(playerHand, dealerHand, simulations){
 
     let total_value_stand = 0;
     for(let i=0; i < (simulations/2); i++){
-        const simulation_deck = copied_deck.clone();
-        let simu_player_count = player_count;
-        let simu_dealer_count = dealer_count;
-        const simu_dealerHand = structuredClone(dealerHand);
 
-        let end_sim = false;
+        total_value_stand += dealerSimulation( player_count, structuredClone(dealerHand), dealer_count, copied_deck.clone());
+        
 
-        //dealer
-        while(!end_sim){
-            simu_dealerHand[simu_dealerHand.length]=simulation_deck.removeRandomCard();
-            simu_dealer_count+=simu_dealerHand[simu_dealerHand.length-1];
-
-            if(simu_dealer_count>21){
-                if(simu_dealerHand.indexOf(11)!==-1){
-                    simu_dealerHand[simu_dealerHand.indexOf(11)]=1;
-                    simu_dealer_count-=10;
-                }
-                else {
-                    //console.log("Dealer busts");
-                    total_value_stand += 1;
-                    end_sim=true;
-                }
-            }
-            else if(simu_dealer_count === 21){
-                //console.log("Dealer Blackjack");
-                total_value_stand += -1;
-                end_sim=true;
-            }
-            else if(simu_dealer_count>=17){
-                if(simu_dealer_count===simu_player_count){
-                    //console.log("Push");
-                    total_value_stand += 0;
-                    end_sim=true;
-                }
-                else if(simu_dealer_count<simu_player_count){
-                    //console.log("Player beats Dealer");
-                    total_value_stand += 1;
-                    end_sim=true;
-                }
-                else if(simu_dealer_count>simu_player_count){
-                    //console.log("Dealer beats Player");
-                    total_value_stand += -1;
-                    end_sim=true;
-                }
-            }
-        }
     }
 
     const stand_ev = total_value_stand / (simulations/2);
@@ -249,6 +170,46 @@ function simulate(playerHand, dealerHand, simulations){
     console.log("Stand EV: "+stand_ev);
     console.log("Hit EV: "+hit_ev);
 
+
+}
+
+function dealerSimulation(player_count,dealerHand,dealer_count,simulation_deck){
+
+    while(simulation_deck.cards_remaining>0){
+        dealerHand[dealerHand.length]=simulation_deck.removeRandomCard();
+        dealer_count+=dealerHand[dealerHand.length-1];
+
+        if(dealer_count>21){
+            if(dealerHand.indexOf(11)!==-1){
+                dealerHand[dealerHand.indexOf(11)]=1;
+                dealer_count-=10;
+            }
+            else {
+                //console.log("Dealer busts");
+                return 1;
+            }
+        }
+        else if(dealer_count === 21){
+            //console.log("Dealer Blackjack");
+            return -1;
+        }
+        else if(dealer_count>=17){
+            if(dealer_count===player_count){
+                //console.log("Push");
+                return 0;
+            }
+            else if(dealer_count<player_count){
+                //console.log("Player beats Dealer");
+                return 1;
+            }
+            else if(dealer_count>player_count){
+                //console.log("Dealer beats Player");
+                return -1;
+            }
+        }
+    }
+    console.log("Not Enough Cards");
+    return 0;
 
 }
 
