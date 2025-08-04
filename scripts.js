@@ -1,6 +1,6 @@
 //BLACKJACK VALUES
 const shoe_decks = 3;
-const total_simulations = 10000;
+const total_simulations = 2000000;
 
 class Deck {
     wholeDecks
@@ -22,6 +22,10 @@ class Deck {
     constructor(wholeDecks){
         this.wholeDecks = wholeDecks;
         this.resetDeck();
+    }
+
+    get cards_remaining(){
+        return this.cards_remaining;
     }
 
     clone(){
@@ -109,46 +113,8 @@ function simulate(playerHand, dealerHand, simulations){
 
     let total_value_hit = 0;
     for(let i=0; i < (simulations/2); i++){
-        const simulation_deck = copied_deck.clone();
-        let simu_player_count = player_count;
-        const simu_playerHand = structuredClone(playerHand);
 
-        let end_sim = false;
-
-        //player
-        let hit = true;
-        while(!end_sim && hit){
-            const pulled_card = simulation_deck.removeRandomCard();
-            simu_playerHand[simu_playerHand.length]= pulled_card;
-            simu_player_count+=simu_playerHand[simu_playerHand.length-1];
-
-            if(simu_player_count>21){
-                if(simu_playerHand.indexOf(11)!==-1){
-                    simu_playerHand[simu_playerHand.indexOf(11)]=1;
-                    simu_player_count-=10;
-                }
-                else {
-                    //console.log("Player Bust");
-                    total_value_hit += -1;
-                    end_sim=true;
-                }
-            }
-            else if(simu_player_count===21){
-                //console.log("Player Blackjack!");
-                total_value_hit += 1.5;
-                end_sim=true;
-            }
-            else if(simu_player_count<21){
-                if( Math.floor(Math.random()*2) === 0 ){
-                    hit = false;
-                }
-            }
-            else { console.log("something went very wrong"); end_sim=true;}
-        }
-
-        //dealer
-
-        total_value_hit += dealerSimulation( simu_player_count, structuredClone(dealerHand), dealer_count, simulation_deck);
+        total_value_hit += playerSimulation(player_count, structuredClone(playerHand), dealer_count, structuredClone(dealerHand), copied_deck.clone());
 
     }
 
@@ -159,22 +125,52 @@ function simulate(playerHand, dealerHand, simulations){
     let total_value_stand = 0;
     for(let i=0; i < (simulations/2); i++){
 
-        total_value_stand += dealerSimulation( player_count, structuredClone(dealerHand), dealer_count, copied_deck.clone());
+        total_value_stand += dealerSimulation( player_count, dealer_count, structuredClone(dealerHand),  copied_deck.clone());
         
-
     }
 
     const stand_ev = total_value_stand / (simulations/2);
 
     
-    console.log("Stand EV: "+stand_ev);
+    
     console.log("Hit EV: "+hit_ev);
-
+    console.log("Stand EV: "+stand_ev);
 
 }
 
-function dealerSimulation(player_count,dealerHand,dealer_count,simulation_deck){
+function playerSimulation(player_count, playerHand, dealer_count, dealerHand, simulation_deck){
+    while(simulation_deck.cards_remaining>0){
+        const pulled_card = simulation_deck.removeRandomCard();
+        playerHand[playerHand.length]= pulled_card;
+        player_count+=playerHand[playerHand.length-1];
 
+        if(player_count>21){
+            if(playerHand.indexOf(11)!==-1){
+                playerHand[playerHand.indexOf(11)]=1;
+                player_count-=10;
+            }
+            else {
+                //console.log("Player Bust");
+                return -1;
+            }
+        }
+        else if(player_count===21){
+            //console.log("Player Blackjack!");
+            return 1.5;
+        }
+        else if(player_count<21){
+            if( Math.floor(Math.random()*2) === 0 ){
+                return dealerSimulation( player_count, dealer_count, dealerHand, simulation_deck);
+            }
+        }
+        else { 
+            console.log("something went very wrong"); 
+            return 0;
+        }
+    }
+}
+
+function dealerSimulation(player_count, dealer_count, dealerHand, simulation_deck){
     while(simulation_deck.cards_remaining>0){
         dealerHand[dealerHand.length]=simulation_deck.removeRandomCard();
         dealer_count+=dealerHand[dealerHand.length-1];
