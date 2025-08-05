@@ -1,6 +1,7 @@
 //BLACKJACK VALUES
 const shoe_decks = 3;
-const total_simulations = 2000000;
+const total_simulations = 74354;
+const loading_bar_increments = 0.10
 
 class Deck {
     wholeDecks
@@ -78,6 +79,10 @@ class Deck {
 
 function updateDisplay() {
     document.getElementById("output").textContent = JSON.stringify(maindeck);
+    document.getElementById("loadingbar").textContent = (loading_bar*100*loading_bar_increments)+'%';
+    document.getElementById("simulate_output").textContent = 
+        "Stand EV:"+simulation_output[0]+
+        "\nHit EV:"+simulation_output[1];
 }
 
 function formatCard(card){
@@ -111,30 +116,32 @@ function simulate(playerHand, dealerHand, simulations){
 
     //HIT EV
 
-    let total_value_hit = 0;
-    for(let i=0; i < (simulations/2); i++){
-
-        total_value_hit += playerSimulation(player_count, structuredClone(playerHand), dealer_count, structuredClone(dealerHand), copied_deck.clone());
-
-    }
-
-    const hit_ev = total_value_hit / (simulations/2);
-
-    //STAND EV
-
     let total_value_stand = 0;
-    for(let i=0; i < (simulations/2); i++){
+    let total_value_hit = 0;
+
+
+    loading_bar=0;
+    updateDisplay();
+
+    for(let i=0; i < simulations; i++){
 
         total_value_stand += dealerSimulation( player_count, dealer_count, structuredClone(dealerHand),  copied_deck.clone());
+        total_value_hit += playerSimulation(player_count, structuredClone(playerHand), dealer_count, structuredClone(dealerHand), copied_deck.clone());
+        
+
+        if( i > (simulations*loading_bar_increments)*loading_bar) {
+            loading_bar = 1 + Math.floor( i/(simulations*loading_bar_increments) );
+        }
         
     }
+    loading_bar=10;
 
-    const stand_ev = total_value_stand / (simulations/2);
+    const stand_ev = total_value_stand / simulations;
+    const hit_ev = total_value_hit / simulations;
+    
+    //console.log("Stand EV: "+stand_ev+" Hit EV: "+hit_ev);
 
-    
-    
-    console.log("Hit EV: "+hit_ev);
-    console.log("Stand EV: "+stand_ev);
+    return [stand_ev, hit_ev];
 
 }
 
@@ -215,12 +222,13 @@ document.getElementById('simulate').addEventListener('click', () => {
     const playerHand = document.getElementById('playerHand').value;
     const dealerHand = document.getElementById('dealerHand').value;
 
-    simulate(
+    simulation_output = simulate(
         formatHand(playerHand.split('')),
         formatHand(dealerHand.split('')),
         total_simulations
     );
 
+    updateDisplay();
 });
 
 
@@ -236,4 +244,6 @@ document.querySelectorAll('button[data-counter]').forEach(button => {
 
 
 const maindeck = new Deck(3);
+let loading_bar = 0;
+let simulation_output = [0,0];
 updateDisplay();
