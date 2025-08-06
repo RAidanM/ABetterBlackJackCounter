@@ -1,7 +1,8 @@
 //BLACKJACK VALUES
 const shoe_decks = 3;
-const total_simulations = 74354;
+const total_simulations = 100000;
 const loading_bar_increments = 0.10
+
 
 class Deck {
     wholeDecks
@@ -79,21 +80,24 @@ class Deck {
 
 function updateDisplay() {
     document.getElementById("output").textContent = JSON.stringify(maindeck);
-    document.getElementById("loadingbar").textContent = (loading_bar*100*loading_bar_increments)+'%';
+    //document.getElementById("loadingbar").textContent = (loading_bar*100*loading_bar_increments)+'%';
+    let result;
+    if(simulation_output[0]>simulation_output[1]){result = 'STAND';} else {result = 'HIT';}
     document.getElementById("simulate_output").textContent = 
-        "Stand EV:"+simulation_output[0]+
+        ""+result+"!"+
+        "\nStand EV:"+simulation_output[0]+
         "\nHit EV:"+simulation_output[1];
 }
 
 function formatCard(card){
-    if (card==='T'){ return 10; }
+    if (card==='T'||card==='J'||card==='Q'||card==='K'){ return 10; }
     else if (card==='A'){ return 11; }
     return card;
 }
 
 function formatHand(hand){
     for (const h in hand){
-        if (hand[h]==='T'){ hand[h] = 10; }
+        if (hand[h]==='T'||hand[h]==='J'||hand[h]==='Q'||hand[h]==='K'){ hand[h] = 10; }
         else if (hand[h]==='A'){ hand[h] = 11; }
     }
     return hand;
@@ -155,6 +159,10 @@ function playerSimulation(player_count, playerHand, dealer_count, dealerHand, si
             if(playerHand.indexOf(11)!==-1){
                 playerHand[playerHand.indexOf(11)]=1;
                 player_count-=10;
+                if(player_count===21){
+                    //console.log("Player Blackjack!");
+                    return 1.5;
+                }
             }
             else {
                 //console.log("Player Bust");
@@ -172,6 +180,7 @@ function playerSimulation(player_count, playerHand, dealer_count, dealerHand, si
         }
         else { 
             console.log("something went very wrong"); 
+            console.log(playerHand);
             return 0;
         }
     }
@@ -216,7 +225,23 @@ function dealerSimulation(player_count, dealer_count, dealerHand, simulation_dec
 
 }
 
+document.getElementById('next').addEventListener('click', () => {
+    const player_cards = formatHand(document.getElementById('playerHand').value.split(''));
+    const dealer_cards = formatHand(document.getElementById('dealerHand').value.split(''));
 
+    for(const p of player_cards){
+        maindeck.removeCard(p);
+    }
+    for(const d of dealer_cards){
+        maindeck.removeCard(d);
+    }
+
+    document.getElementById('playerHand').value='';
+    document.getElementById('dealerHand').value='';
+    loading_bar = 0;
+    simulation_output = [0,0]
+    updateDisplay();
+});
 
 document.getElementById('simulate').addEventListener('click', () => {
     const playerHand = document.getElementById('playerHand').value;
